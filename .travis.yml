@@ -1,0 +1,41 @@
+git:
+  quiet: true
+
+dist: xenial
+language: c
+sudo: required
+addons:
+  apt:
+    packages:
+      - libtool
+      - libtool-bin
+      - swig
+      - redland-utils
+      - librdf-dev
+
+
+notifications:
+    email:
+       on_failure: change
+
+cache:
+    apt: true
+    ccache: true
+
+before_script:
+    - ccache --version
+    - ccache --zero-stats
+    - ./autogen.sh
+    - make
+    - make install
+
+# Run PHPs run-tests.php
+script:
+    - wget http://planetrdf.com/guide/rss.rdf
+    - rdfproc -v
+    - rdfproc test parse ./rss.rdf
+    - rdfproc test print
+    - rdfproc test serialize ntriples
+
+after_success:
+    - ccache --show-stats
